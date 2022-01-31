@@ -18,7 +18,7 @@ const (
 )
 
 func main() {
-
+	fmt.Println("Starting service bus receiver")
 	client, _ := azservicebus.NewClientFromConnectionString(connectionString, nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
@@ -35,6 +35,8 @@ func main() {
 			}
 			msg, _ := message.Body()
 			operationLocation := string(msg)
+			//wait for the operation to complete
+			time.Sleep(2 * time.Second)
 			result := getResultFromOperationLocation(operationLocation)
 			tckn := extractTckn(result)
 			writeResultToQueue(tckn)
@@ -69,6 +71,7 @@ func getResultFromOperationLocation(url string) Result {
 }
 
 func extractTckn(result Result) string {
+
 	page := result.AnalyzeResult.ReadResults[0]
 	r, _ := regexp.Compile("[0-9]{11}")
 	for _, sentence := range page.Lines {
